@@ -56,6 +56,7 @@ html { scroll-padding-top: env(safe-area-inset-top, 0px); }
 html, body { height: 100%; }
 body {
   margin: 0;
+  overflow-x: hidden; /* safety net only — the actual fix is min-width:0 on shrinking flex/grid children below */
   background: var(--bg);
   color: var(--text-primary);
   font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -159,8 +160,10 @@ select.tz-select:hover { border-color: var(--text-secondary); }
 label.field-label { display: block; font-size: 12px; color: var(--text-faint); margin-bottom: var(--sp-2); }
 .field-row { margin-bottom: var(--sp-4); }
 .field-row:last-child { margin-bottom: 0; }
-.two-up { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); }
-.three-up { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--sp-2); }
+/* minmax(0,1fr) — not plain 1fr — so a track can shrink below its
+   content's natural width instead of forcing the row to overflow */
+.two-up { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--sp-2); }
+.three-up { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--sp-2); }
 
 select, input[type=text], input[type=date], input[type=time], input[type=number] {
   width: 100%;
@@ -190,7 +193,7 @@ input[type=number]::-webkit-inner-spin-button { opacity: 0.5; }
 }
 
 .quick-row { display: flex; gap: var(--sp-2); margin-top: var(--sp-3); }
-.quick-row input { flex: 1; }
+.quick-row input { flex: 1; min-width: 0; }
 .btn-ghost {
   background: transparent;
   border: 1px solid var(--line-strong);
@@ -221,7 +224,7 @@ input[type=number]::-webkit-inner-spin-button { opacity: 0.5; }
   transition: border-color var(--dur-base) var(--ease);
 }
 .boost-card:focus-within { border-color: var(--line-strong); }
-.boost-card-top { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.boost-card-top { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: var(--sp-3); flex-wrap: wrap; }
 .boost-index {
   width: 22px; height: 22px;
   border-radius: 50%;
@@ -232,7 +235,7 @@ input[type=number]::-webkit-inner-spin-button { opacity: 0.5; }
   display: flex; align-items: center; justify-content: center;
   flex: none;
 }
-.boost-card-top select { flex: 1; }
+.boost-card-top select { flex: 1; min-width: 0; }
 .boost-actions { display: flex; gap: 4px; flex: none; }
 .icon-btn {
   width: 28px; height: 28px;
@@ -251,7 +254,7 @@ input[type=number]::-webkit-inner-spin-button { opacity: 0.5; }
 .icon-btn:disabled { opacity: .35; cursor: default; }
 .icon-btn:disabled:hover { color: var(--text-secondary); border-color: var(--line-strong); background: transparent; }
 .icon-btn.danger:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-soft); }
-.boost-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--sp-2); }
+.boost-fields { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--sp-2); }
 .boost-fields .field-mini label { font-size: 10.5px; color: var(--text-faint); display: block; margin-bottom: 4px; }
 
 #addBoostBtn {
@@ -320,8 +323,8 @@ input[type=number]::-webkit-inner-spin-button { opacity: 0.5; }
 .countdown-box.done { background: var(--accent-soft); }
 .countdown-box.done .value { color: var(--accent); }
 
-.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); margin-bottom: var(--sp-5); }
-.stat { background: var(--surface-2); border-radius: var(--r-md); padding: 13px 10px; text-align: center; }
+.stat-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--sp-2); margin-bottom: var(--sp-5); }
+.stat { min-width: 0; background: var(--surface-2); border-radius: var(--r-md); padding: 13px 10px; text-align: center; }
 .stat .stat-label { font-size: 10.5px; color: var(--text-faint); margin-bottom: 6px; }
 .stat .stat-value { font-size: 17px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
 .stat.saved .stat-value { color: var(--success); }
@@ -373,7 +376,7 @@ details.breakdown[open] summary::before { content: '▾ '; }
 }
 
 .result-actions { display: flex; gap: var(--sp-2); margin-top: var(--sp-5); }
-.result-actions button { flex: 1; }
+.result-actions button { flex: 1; min-width: 0; }
 
 /* saved calculations */
 #savedList { display: flex; flex-direction: column; gap: var(--sp-2); }
@@ -398,7 +401,7 @@ footer.foot { text-align: center; color: var(--text-faint); font-size: 12px; mar
   .stat .stat-value { font-size: 15px; }
 }
 @media (max-width: 380px) {
-  .boost-fields { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .boost-fields { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; }
   .stat-grid { gap: 6px; }
   .stat { padding: 11px 6px; }
 }
