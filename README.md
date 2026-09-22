@@ -65,9 +65,11 @@ There's nothing to build or install. Either:
 
 ```text
 .
-├── index.html    # page structure and content
-├── styles.css    # design system: colors, type, spacing, components
-├── script.js     # engine, rendering, storage — no external deps
+├── index.html   # page structure and content
+├── css/
+│   └── style.css   # design system: colors, type, spacing, components
+├── js/
+    └── script.js   # engine, rendering, storage — no external deps
 └── README.md
 ```
 
