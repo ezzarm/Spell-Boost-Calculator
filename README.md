@@ -1,91 +1,117 @@
-# Rally — Boost Time Calculator
+# Rally: Boost Time and Hero Equipment Ore Calculator
 
-A small, static web tool for planning when a building, research, hero, or pet
-upgrade will finish once you apply one or more speed-up boosts (potions) to
-it. Independent fan-made tool — not affiliated with Supercell.
+Two small tools for a mobile strategy game, in one static page:
 
-**[Try it live →](#)** *(https://spell-boost-calculator.vercel.app/)*
+1. **Boost time**: when will an upgrade finish once you apply speed-up boosts?
+2. **Hero equipment ore**: how much Shiny, Glowy and Starry Ore does an equipment upgrade plan need?
 
-## What it does
+Independent fan-made tool. Not affiliated with Supercell.
 
-- Enter a start date/time and how much time is left on an upgrade
-- Queue up one or more boosts (Builder Potion, Research Potion, Pet Potion,
-  or a custom multiplier + duration), in the order you'll use them
-- Reorder, duplicate, or delete boosts in the queue
-- Get the exact finish date/time, a live countdown, how much time the boosts
-  saved, and a visual timeline of normal-speed vs. boosted segments
-- Pick a timezone (WIB / WITA / WIT, or your device's local time) so the
-  result matches when you'll actually be looking at your phone
-- Save calculations locally (per-device, via `localStorage`) and reload them
-  later, or share a plain-text summary
-- Type a duration in shorthand (`2d 17h`) instead of filling in three fields
+**[Try it live](#)** *(replace with your hosted link)*
 
-## How the calculation works
+## Boost time calculator
 
-Boosts are applied in queue order. For each boost, the tool converts its
-real duration into "accelerated progress" (`duration × multiplier`):
+- Enter a start date and time and how much time is left on an upgrade
+- Queue boosts (Builder, Research, Pet potion, or a custom multiplier and duration) in the order you'll use them; reorder, duplicate or delete them
+- Get the exact finish time, a live countdown, time saved, and a timeline of normal and boosted segments
+- Timezones: WIB, WITA, WIT, or the device's local time
+- Save calculations on the device and reload them later; share a text summary
 
-- If that's *more* progress than what's left on the upgrade, only the real
-  time actually needed to finish is counted — the boost is cut short.
-- Otherwise, the full boost duration is consumed and the remaining work is
-  reduced accordingly, then the next boost in the queue is applied.
+Boosts apply in queue order. Each boost turns its real duration into progress (`duration × multiplier`). If that is more than what is left, only the real time actually needed is counted. Otherwise the whole boost is used and the next one starts. Whatever remains after the queue runs at normal speed. The "How was this calculated?" panel shows the working for any result.
 
-Anything still left after every boost in the queue is spent runs at normal
-(1×) speed. The full step-by-step math for any given result is available in
-the "How was this calculated?" panel under the result.
+## Hero equipment ore calculator
 
-## Tech stack
+Open the **Hero equipment ore** tab (URL hash `#ore`).
 
-Plain HTML, CSS, and JavaScript — no build step, no framework, no
-dependencies beyond three Google Fonts. Intentional: for a single-purpose
-calculator like this, a bundler or component framework would add complexity
-without adding capability.
+Equipment upgrades are instant. They cost ore, not time, so this tab does not use the boost queue or the timezone.
 
-- `index.html` — markup
-- `styles.css` — design tokens and styling
-- `script.js` — calculation engine, UI rendering, and local storage
+1. **Build a plan.** Pick a hero and a piece of equipment and press *Add*, or *Add all* for a hero, or *Add all equipment*. Every piece starts at current level 1 and at its default target level.
+2. **Set levels.** Edit each piece's current and target level. Target presets: *Default* (your preset target), *Max* (18 for Common, 27 for Epic) and *Custom* (type any level).
+3. **Enter ore in stock** (Shiny, Glowy, Starry). Blank means none.
+4. **Press *Calculate all*.** You get, per piece, its ore total and a level-by-level breakdown, and for the whole plan the required ore, ore in stock, and the balance (short or spare). After the first calculation, results update as you edit.
+
+Scope of the reset controls:
+
+| Control | What it does |
+| --- | --- |
+| Reset (on a piece) | That piece goes back to current level 1 and its default target |
+| Restore default targets | Every piece's target returns to its default; current levels are kept |
+| Clear plan | Removes every piece from the plan; stock is kept |
+| ✕ (on a piece) | Removes that piece |
+
+Invalid rows (blank, non-numeric, out of range, or target below current) are flagged on the row and left out of the totals, and the summary says how many were skipped. The plan and stock persist in the browser (`localStorage`, per device).
+
+### Rules
+
+- Common equipment maxes at level 18, Epic at level 27.
+- Cost of going from level `A` to `B` is the sum of the costs of upgrades to `A+1` through `B`. `A = B` costs nothing.
+- Common equipment never costs Starry Ore. Epic equipment costs Starry Ore only at levels 9, 12, 15, 18, 21, 24 and 27.
+
+### Cost data: status and sources
+
+**The ore costs have not been verified against the live game.** They are community-published per-level tables, cross-checked against each other and against published maximum-level totals.
+
+- Dataset version `2026-10`, retrieved 2026-10-12
+- Every level (2 to 18 Common, 2 to 27 Epic) has at least two agreeing sources
+- Sums match the published totals: Common 1 to 18 is 27,260 Shiny and 1,920 Glowy; Epic 1 to 27 is 56,060 Shiny, 3,720 Glowy and 480 Starry
+- Epic cumulative Shiny, Glowy and Starry also match checkpoints from a separate wiki table
+- Unverified levels: none flagged
+
+Known caveats:
+
+- Supercell's October 2026 ore announcement changes Gem and Medal prices for ore, not the ore each level needs. Supercell has said more ore-economy news is coming later in October, so recheck afterwards.
+- One source's aggregate row ("L1 to L9: 1,680 Shiny") disagrees with its own per-level values. It was not used.
+- Hero assignments agree between two sources. Rarities come from one 2026 guide and are not confirmed in-game. Monolith Arrow is classed Epic (released as an Epic in a June 2026 medal event).
+- Supercell's support article was not used for per-level numbers.
+
+The full source list is in the app under *About the cost data*, and in `ore/data.js`.
+
+### Updating the data
+
+Edit `ore/data.js`: the two row tables (`[destinationLevel, shiny, glowy, starry]`), the registry, and `META` (version, date, sources, notes). Then run the tests. They fail if a level is missing, a value is not a non-negative integer, Common costs Starry Ore, or the sums stop matching the baseline totals. To add equipment, add one line to `EQUIPMENT`. To change a default target, edit its `defaultTarget`.
 
 ## Running it
 
-There's nothing to build or install. Either:
+No build step. Open `index.html` in a browser, or serve the folder:
 
-- Open `index.html` directly in a browser, or
-- Serve the folder with any static file server, e.g.:
+```bash
+npx serve .
+# or
+python3 -m http.server 8000
+```
 
-  ```bash
-  npx serve .
-  # or
-  python3 -m http.server 8000
-  ```
+## Tests
 
-  (A local server avoids some browsers' restrictions on `file://` pages
-  loading external fonts.)
+```bash
+npm install   # installs jsdom, used only by the DOM tests
+npm test      # Node 18 or newer
+```
+
+- `tests/ore.test.js`: dataset integrity and every calculation rule (same-level, destination-level costs, bounds, missing data, inventory, combined totals)
+- `tests/app.test.js`: loads the real page in jsdom and checks the boost calculator for regressions, navigation, and the ore view end to end
+
+jsdom checks behaviour, not layout. Check responsive layout in a real browser.
 
 ## Project structure
 
 ```text
 .
-├── index.html   # page structure and content
-├── css/
-│   └── style.css   # design system: colors, type, spacing, components
-├── js/
-    └── script.js   # engine, rendering, storage — no external deps
+├── index.html     # page structure: both views
+├── styles.css     # design tokens and styling for both views
+├── script.js      # boost time calculator (engine, rendering, storage)
+├── nav.js         # switches views from the URL hash (#time, #ore)
+├── ore/
+│   ├── data.js    # equipment registry and per-level ore costs, with sources
+│   ├── calc.js    # pure calculation functions, no DOM
+│   └── ui.js      # ore view rendering and state
+├── tests/
+├── package.json   # test script only
 └── README.md
 ```
 
-## Notes on the design
+## Notes
 
-- Single dark theme by design (this is meant to feel like a fixed-purpose
-  utility panel, not a themeable app), with one accent color (amber) for
-  primary actions and a second accent (ember) reserved for boost-segment
-  coding in the timeline. Green/red are used only for outcome states
-  (time saved, errors) — never decoratively.
-- Monospace type (JetBrains Mono) is used only for numeric/time values, so
-  digits don't shift width while the countdown ticks.
-- All calculated data (saved calculations) lives in the browser's
-  `localStorage` — nothing is sent to a server, and nothing is shared
-  between devices or visitors.
-
-## License
-
-Add a license of your choice (e.g. MIT) if you intend to open-source this.
+- Plain HTML, CSS and JavaScript. The only dependency is jsdom, for tests.
+- `ore/data.js` and `ore/calc.js` run in both the browser and Node, so the same code is tested and shipped.
+- Single dark theme by design. One accent (amber) marks primary actions; green and red appear only for outcomes (spare, short, errors).
+- Monospace type is used only for numbers, so digits don't shift width as values change.
