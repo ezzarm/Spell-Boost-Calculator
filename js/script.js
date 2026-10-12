@@ -367,7 +367,7 @@
     var noticeEl = $('midBoostNotice');
     if (result.finishedDuringBoostIndex >= 0){
       noticeEl.style.display = 'block';
-      noticeEl.textContent = 'Boost #' + (result.finishedDuringBoostIndex+1) + ' is enough to finish the process on its own — the timer completes while that boost is still active.';
+      noticeEl.textContent = 'Boost #' + (result.finishedDuringBoostIndex+1) + ' is enough to finish the process on its own. The timer completes while that boost is still active.';
     } else {
       noticeEl.style.display = 'none';
     }
@@ -505,7 +505,7 @@
       'Finish: ' + w.dateStr + ' ' + w.timeStr + ' ' + w.tzLabel + '\n' +
       'Saved: ' + formatDurationSeconds(timeSaved);
     if (navigator.share){
-      navigator.share({ title: 'Rally — Boost Time Calculator', text: text }).catch(function(){});
+      navigator.share({ title: 'Rally \u00b7 Boost Time Calculator', text: text }).catch(function(){});
     } else if (navigator.clipboard) {
       navigator.clipboard.writeText(text).then(function(){
         var btn = $('shareBtn');
@@ -521,7 +521,7 @@
   $('calculateBtn').addEventListener('click', calculate);
   $('quickFillBtn').addEventListener('click', function(){
     var parsed = parseQuickDuration($('quickDuration').value);
-    if (!parsed){ showError('Could not read that duration — try formats like "2d 17h".'); return; }
+    if (!parsed){ showError('Could not read that duration. Try formats like "2d 17h".'); return; }
     $('durDays').value = parsed.d;
     $('durHours').value = parsed.h;
     $('durMinutes').value = parsed.m;

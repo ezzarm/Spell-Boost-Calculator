@@ -1,0 +1,12 @@
+{
+  "name": "rally-boost-calculator",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Boost time calculator and hero equipment ore calculator. Plain HTML, CSS and JavaScript.",
+  "scripts": {
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.0"
+  }
+}

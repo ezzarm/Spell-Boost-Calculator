@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/styles.css">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="wrap">
@@ -17,21 +17,26 @@
       <div class="brand-mark" aria-hidden="true">🏗️</div>
       <div>
         <h1>Rally</h1>
-        <p>Boost time calculator for building, research, hero &amp; pet upgrades</p>
+        <p id="brandSub">Boost time calculator for building, research, hero &amp; pet upgrades</p>
       </div>
     </div>
     <div class="tz-picker">
       <label for="tzSelect">Timezone</label>
       <select id="tzSelect" class="tz-select">
-        <option value="WIB">WIB — UTC+7</option>
-        <option value="WITA">WITA — UTC+8</option>
-        <option value="WIT">WIT — UTC+9</option>
+        <option value="WIB">WIB · UTC+7</option>
+        <option value="WITA">WITA · UTC+8</option>
+        <option value="WIT">WIT · UTC+9</option>
         <option value="LOCAL">Device local time</option>
       </select>
     </div>
   </header>
 
-  <main class="layout">
+  <nav class="view-tabs" aria-label="Calculators">
+    <a class="view-tab" id="tab-time" href="#time" aria-current="page">Boost time</a>
+    <a class="view-tab" id="tab-ore" href="#ore">Hero equipment ore</a>
+  </nav>
+
+  <main class="layout" id="view-time">
     <!-- ============ INPUTS ============ -->
     <div class="col-input">
       <section class="panel" aria-labelledby="stepUpgrading">
@@ -138,9 +143,117 @@
     </div>
   </main>
 
+  <!-- ============ HERO EQUIPMENT ORE ============ -->
+  <main class="layout" id="view-ore" hidden>
+    <div class="col-input">
+      <section class="panel" aria-labelledby="oreStepPlan">
+        <h2 id="oreStepPlan"><span class="step-n" aria-hidden="true">1</span>Equipment plan</h2>
+        <p class="ore-intro">Equipment upgrades are <strong>instant</strong>. They cost ore, not time, so nothing on this tab uses the boost queue or the timezone.</p>
+
+        <div class="error-banner" id="oreDataError" role="alert" hidden></div>
+
+        <div class="ore-add">
+          <div>
+            <label class="mini-label" for="oreHeroSelect">Hero</label>
+            <select id="oreHeroSelect"></select>
+          </div>
+          <div>
+            <label class="mini-label" for="oreEquipSelect">Equipment</label>
+            <select id="oreEquipSelect"></select>
+          </div>
+          <button class="btn-ghost" id="oreAddBtn" type="button">Add</button>
+        </div>
+        <div class="ore-bulk">
+          <button class="btn-ghost btn-sm" id="oreAddHeroBtn" type="button">Add all</button>
+          <button class="btn-ghost btn-sm" id="oreAddAllBtn" type="button">Add all equipment</button>
+        </div>
+
+        <div class="ore-toolbar">
+          <span class="ore-count-line" id="orePlanCount">0 items in plan</span>
+          <div class="ore-toolbar-actions">
+            <button class="btn-ghost btn-sm" id="oreRestoreBtn" type="button">Restore default targets</button>
+            <button class="btn-ghost btn-sm" id="oreClearBtn" type="button">Clear plan</button>
+          </div>
+        </div>
+
+        <div id="orePlanList"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="oreStepStock">
+        <h2 id="oreStepStock"><span class="step-n" aria-hidden="true">2</span>Ore in stock</h2>
+        <div class="three-up">
+          <div>
+            <label class="mini-label" for="oreInvShiny">Shiny</label>
+            <input type="number" id="oreInvShiny" min="0" step="1" inputmode="numeric" placeholder="0" aria-describedby="oreInvMsg">
+          </div>
+          <div>
+            <label class="mini-label" for="oreInvGlowy">Glowy</label>
+            <input type="number" id="oreInvGlowy" min="0" step="1" inputmode="numeric" placeholder="0" aria-describedby="oreInvMsg">
+          </div>
+          <div>
+            <label class="mini-label" for="oreInvStarry">Starry</label>
+            <input type="number" id="oreInvStarry" min="0" step="1" inputmode="numeric" placeholder="0" aria-describedby="oreInvMsg">
+          </div>
+        </div>
+        <p class="ore-msg" id="oreInvMsg" aria-live="polite"></p>
+        <p class="hint">Leave a field blank if you have none. Used to work out what you&rsquo;re short of, or have spare.</p>
+
+        <button class="calc-btn" id="oreCalculateBtn" type="button">Calculate all</button>
+        <div class="error-banner" id="oreError" role="alert"></div>
+      </section>
+    </div>
+
+    <div class="col-result">
+      <section class="panel" aria-labelledby="oreResultHeading">
+        <h2 id="oreResultHeading">Ore needed</h2>
+
+        <div class="result-empty" id="oreResultEmpty">
+          <div class="glyph" aria-hidden="true">&#9874;</div>
+          Add equipment, set your current and target levels, then hit <strong>Calculate all</strong>.
+        </div>
+
+        <div id="oreResultContent" hidden>
+          <p class="ore-count-line" id="oreCountLine"></p>
+          <div class="notice" id="oreSkipNote" hidden></div>
+          <div id="oreSumWrap">
+            <div class="ore-sum-wrap">
+            <table class="ore-sum">
+              <caption class="sr-only">Ore required for the whole plan, against ore in stock</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Ore</th>
+                  <th scope="col" class="num">Required</th>
+                  <th scope="col" class="num">In stock</th>
+                  <th scope="col" class="num">Balance</th>
+                </tr>
+              </thead>
+              <tbody id="oreSummaryBody"></tbody>
+            </table>
+            </div>
+            <p class="hint">Balance: a minus means you&rsquo;re short, a plus means spare. Expand any item in the plan for its level-by-level cost.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="oreSourceHeading">
+        <h2 id="oreSourceHeading">About the cost data</h2>
+        <details class="breakdown ore-source">
+          <summary>Sources, date and caveats</summary>
+          <div class="ore-source-body" id="oreSourceBody"></div>
+        </details>
+      </section>
+    </div>
+  </main>
+
+  <div class="sr-only" id="oreStatus" role="status" aria-live="polite"></div>
+
   <footer class="foot">Independent fan-made tool. Not affiliated with Supercell.</footer>
 </div>
 
-<script src="/js/script.js"></script>
+<script src="script.js"></script>
+<script src="ore/data.js"></script>
+<script src="ore/calc.js"></script>
+<script src="ore/ui.js"></script>
+<script src="nav.js"></script>
 </body>
 </html>
